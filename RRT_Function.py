@@ -1,7 +1,7 @@
 import Graph_RRT as GR
 import random
 import numpy
-
+from Constant import *
 
 def Sample_Region(region):
     x = random.uniform(region.x_low, region.x_up)
@@ -11,8 +11,8 @@ def Sample_Region(region):
 
 
 def Distance_Points(X1, X2):
-    A = numpy.sqrt(X1[0] - X2[0]) + numpy.sqrt(X1[1] - X2[1])
-    D = numpy.square(A)
+    A = numpy.square(X1[0] - X2[0]) + numpy.square(X1[1] - X2[1])
+    D = numpy.sqrt(A)
     return D
 
 
@@ -25,6 +25,18 @@ def Nearest(G, points, x_random):
             D = Distance_Points(points[node], x_random)
             x_nearest = node
     return x_nearest
+
+
+def Steer(x_nearest, x_random, points):
+    x_n = points[x_nearest]
+    x_delta = numpy.abs(x_n[0]-x_random[0])
+    y_delta = numpy.abs(x_n[1]-x_random[1])
+    xy = numpy.sqrt(numpy.square(x_delta)+numpy.square(y_delta))
+    x_new_x = x_n[0] + min_edge*y_delta/xy
+    x_new_y = x_n[1] + min_edge*x_delta/xy
+    points.append([x_new_x, x_new_y])
+    x_new = len(points) - 1
+    return x_new
 
 
 def Obstacle_Free(Obstacle, X1, X2):

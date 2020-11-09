@@ -1,1 +1,1 @@
-min_edge = 1
+min_edge = 3
