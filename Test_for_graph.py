@@ -12,13 +12,13 @@ points = [P]
 
 for i in range(20):
 
-    x_random = Sample_Region(R)
+    point_random = Sample_Region(R)
     # print("x_random is ", x_random)
 
-    x_nearest = Nearest(G, points, x_random)
+    x_nearest = Nearest(G, points, point_random)
     print("x_nearest is", x_nearest, points[x_nearest].xy())
 
-    x_new = Steer(x_nearest, x_random, points)
+    x_new = Steer(x_nearest, point_random, points)
     # print("x_new is",x_new, points[x_new])
     G.Add_Node(x_new)
 

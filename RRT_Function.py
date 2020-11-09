@@ -29,10 +29,10 @@ def Nearest(G, points, x_random):
     return x_nearest
 
 
-def Steer(x_nearest, x_random, points):
+def Steer(x_nearest, point_random, points):
     x_n = points[x_nearest].xy()
-    x_delta = numpy.abs(x_n[0]-x_random[0])
-    y_delta = numpy.abs(x_n[1]-x_random[1])
+    x_delta = numpy.abs(x_n[0]-point_random[0])
+    y_delta = numpy.abs(x_n[1]-point_random[1])
     xy = numpy.sqrt(numpy.square(x_delta)+numpy.square(y_delta))
     x_new_x = x_n[0] + min_edge*y_delta/xy
     x_new_y = x_n[1] + min_edge*x_delta/xy
