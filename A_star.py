@@ -49,7 +49,7 @@ def astar(maze, start, end):
                 current_node  = item
                 current_index = index
 
-        plot.draw_cell(current_node.position[0],current_node.position[1],color="#008000")
+        plot.draw_cell(current_node.position[0],current_node.position[1],color="#ffd343")
         plot.win.after(300)
         plot.win.update()
 
@@ -64,6 +64,11 @@ def astar(maze, start, end):
             while current is not None:
                 path.append(current.position)
                 current = current.parent
+
+            plot.draw_traj(path)
+            plot.win.after(300)
+            plot.win.update()
+
             return path[::-1] # Return reversed path
 
         # Generate children
@@ -91,9 +96,15 @@ def astar(maze, start, end):
         for child in children:
 
             # Child is on the closed list
-            # for closed_child in closed_list: 
-            #     if child == closed_child: # ???
-            #         continue
+            for closed_child in closed_list: 
+                if child == closed_child: # ???
+                    continue
+
+            # for closed_child in closed_list:
+            #     if child == closed_child:
+            #         break
+            # if child == closed_child:
+            #     continue
 
             # Create the f, g, and h values
             child.g = current_node.g + 1
@@ -101,10 +112,15 @@ def astar(maze, start, end):
             child.f = child.g + child.h
 
             # Child is already in the open list
+            for open_node in open_list:
+                if child == open_node and child.g > open_node.g: # ???
+                    continue
+
             # for open_node in open_list:
             #     if child == open_node and child.g > open_node.g: # ???
-            #         continue
-
+            #         break   
+            # if child == open_node and child.g > open_node.g:
+            #     continue
             # Add the child to the open list
             open_list.append(child)
     plot.show()
