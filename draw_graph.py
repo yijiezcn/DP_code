@@ -1,10 +1,3 @@
-"""Demand
-1. Initialize. Plot obstacles, start and goal zone.py
-2. Add node 
-3. Add edge
-4. Delete node 
-5. Delete edge
-"""
 import matplotlib.pyplot as plt
 import numpy as np
 
