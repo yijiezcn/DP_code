@@ -6,3 +6,4 @@ class graph():
         self.edge = None
         self.node = None
 
+ChildProcessError
