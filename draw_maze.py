@@ -77,6 +77,11 @@ class DrawMaze():
 
                  self.draw_cell(current_position[0], current_position[1], color=color)
 
+    def draw_traj(self, traj, color=TRAJ_COLOR):
+        traj = np.array(traj)
+        for current_position in traj:
+                 self.draw_cell(current_position[0], current_position[1], color=color)
+
     def erase_draw(self, era_pos, draw_pos, draw_clolor):
         """Erase and then draw 
 
