@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-class DrawGraph():
+class Animation():
     PAUSE_TIME = 2
     FIG_SIZE = 5
     def __init__(self,start_info,end_info,obs_info):
@@ -114,9 +114,9 @@ def main():
     start_info = [0,0,1,1]
     end_info = [4,4,1,1]
     obs_info = [[-1,-1,1,1],[1,-1,1,1]]
-    plot = DrawGraph(start_info,end_info,obs_info)
+    plot = Animation(start_info,end_info,obs_info)
 
-    # plot = DrawGraph()
+    # plot = Animation()
     # quad = plot.draw_quad([3,2,2,4])
     # # plot.draw_quad([3,2],[2,4],'white')
     # # plot.erase(quad)
