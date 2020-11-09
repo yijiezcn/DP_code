@@ -2,6 +2,8 @@ import Graph_RRT as GR
 import random
 import numpy
 from Constant import *
+from Graph_RRT import *
+
 
 def Sample_Region(region):
     x = random.uniform(region.x_low, region.x_up)
@@ -21,22 +23,34 @@ def Nearest(G, points, x_random):
     D = 10000000
     x_nearest = -1
     for node in nodes:
-        if Distance_Points(points[node], x_random) < D:
-            D = Distance_Points(points[node], x_random)
+        if Distance_Points(points[node].xy(), x_random) < D:
+            D = Distance_Points(points[node].xy(), x_random)
             x_nearest = node
     return x_nearest
 
 
 def Steer(x_nearest, x_random, points):
-    x_n = points[x_nearest]
+    x_n = points[x_nearest].xy()
     x_delta = numpy.abs(x_n[0]-x_random[0])
     y_delta = numpy.abs(x_n[1]-x_random[1])
     xy = numpy.sqrt(numpy.square(x_delta)+numpy.square(y_delta))
     x_new_x = x_n[0] + min_edge*y_delta/xy
     x_new_y = x_n[1] + min_edge*x_delta/xy
-    points.append([x_new_x, x_new_y])
+    points.append(Point(x_new_x, x_new_y))
     x_new = len(points) - 1
     return x_new
+
+
+
+def Near(G, x_new, points):
+    nodes = G.Get_Node()
+    near_nodes = []
+    for node in nodes:
+        if Distance_Points(points[node].xy(), points[x_new].xy()) <= Near_r:
+            near_nodes.append(node)
+    return near_nodes
+
+
 
 
 def Obstacle_Free(Obstacle, X1, X2):
