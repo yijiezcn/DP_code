@@ -28,7 +28,18 @@ class Point:
 
     def __init__(self, x, y):
         self.X = [x, y]
-
+        self.g = 0
+        self.lmc = 0
+        self.parent = -1
 
     def xy(self):
         return self.X
+
+    def Add_g(self, g):
+        self.g = g
+
+    def Add_lmc(self, lmc):
+        self.lmc = lmc
+
+    def Add_parent(self, parent):
+        self.parent = parent

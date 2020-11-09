@@ -18,13 +18,13 @@ def Distance_Points(X1, X2):
     return D
 
 
-def Nearest(G, points, x_random):
+def Nearest(G, points, point_random):
     nodes = G.Get_Node()
     D = 10000000
     x_nearest = -1
     for node in nodes:
-        if Distance_Points(points[node].xy(), x_random) < D:
-            D = Distance_Points(points[node].xy(), x_random)
+        if Distance_Points(points[node].xy(), point_random) < D:
+            D = Distance_Points(points[node].xy(), point_random)
             x_nearest = node
     return x_nearest
 
@@ -41,7 +41,6 @@ def Steer(x_nearest, point_random, points):
     return x_new
 
 
-
 def Near(G, x_new, points):
     nodes = G.Get_Node()
     near_nodes = []
@@ -49,6 +48,21 @@ def Near(G, x_new, points):
         if Distance_Points(points[node].xy(), points[x_new].xy()) <= Near_r:
             near_nodes.append(node)
     return near_nodes
+
+
+def Initialize(x_1, x_2, points):
+    points[x_1].Add_g = -1
+
+
+
+
+def Extend(G, Obstacles, points, point_random):
+    x_nearest = Nearest(G, points, point_random)
+    x_new = Steer(x_nearest, point_random, points)
+    if Obstacle_Free(Obstacles, points[x_nearest].xy(), points[x_new].xy()):
+        near_nodes = Near(G, x_new, points)
+
+
 
 
 
