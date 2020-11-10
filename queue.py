@@ -81,7 +81,7 @@ def Update_Queue(x, queue, points, goal):
 
 
 def Replan(queue, G, points, goal):
-    x, key = queue.findmin()
+    x_min, key_min = queue.findmin()
     nodes = G.Get_Nodes()
     key_goal = [float('inf'), float('inf')]
     for node in nodes:
@@ -89,4 +89,5 @@ def Replan(queue, G, points, goal):
             key_g = [points[node].lmc(), points[node].lmc()]
             if Key_LQ(key_g, key_goal):
                 key_goal = key_g
+    while Key_LQ(key_min, key_goal):
 
