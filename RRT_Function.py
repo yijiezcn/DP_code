@@ -49,9 +49,13 @@ def Near(G, x_new, points):
     return near_nodes
 
 
-def Initialize(x_1, x_2, points):
+def Initialize(x_1, x_2, points, goal):
     p1 = points[x_1]
     p2 = points[x_2]
+    if Region_Check(goal, p1.xy()) and Region_Check(goal, p2.xy()):
+        p1.Add_g(float('inf'))
+        p1.Add_lmc(p2.g() + Distance_Points(p1.xy(), p2.xy()))
+        return
     p1.Add_g(float('inf'))
     p1.Add_lmc(p2.g()+Distance_Points(p1.xy(), p2.xy()))
     p1.Add_parent(x_2)
@@ -66,7 +70,7 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
     #     print("Yes")
     # print("x_new is",x_new, points[x_new].xy())
     if Obstacles_Free(Obstacles, points[x_nearest].xy(), points[x_new].xy()):
-        Initialize(x_new, x_nearest, points)
+        Initialize(x_new, x_nearest, points, goal)
         # print("lmc of x_new is", points[x_new].lmc())
         near_nodes = Near(G, x_new, points)
         # print(near_nodes)
@@ -76,7 +80,8 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
             if Obstacles_Free(Obstacles, points[node].xy(), points[x_new].xy()):
                 if points[x_new].lmc() > points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()):
                     points[x_new].Add_lmc(points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()))
-                    points[x_new].Add_parent(node)
+                    if not Region_Check(goal, points[node].xy()) or not Region_Check(goal, points[x_new].xy()):
+                        points[x_new].Add_parent(node)
                 G.Add_Edge([node, x_new])
                 G.Add_Edge([x_new, node])
         G.Add_Node(x_new)
@@ -160,7 +165,7 @@ def RRT_Body():
 
     goal_set = []
 
-    for i in range(500):
+    for i in range(1000):
         point_rand = Sample_Region(R)
         Extend(G, obstacles, points, point_rand, q, goal)
 
