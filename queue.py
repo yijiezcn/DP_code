@@ -80,7 +80,13 @@ def Update_Queue(x, queue, points, goal):
         queue.delete(x)
 
 
-def Replan(queue, G, points):
+def Replan(queue, G, points, goal):
     x, key = queue.findmin()
     nodes = G.Get_Nodes()
-    print(nodes)
+    key_goal = [float('inf'), float('inf')]
+    for node in nodes:
+        if RF.Region_Check(goal, points[node].xy()):
+            key_g = [points[node].lmc(), points[node].lmc()]
+            if Key_LQ(key_g, key_goal):
+                key_goal = key_g
+

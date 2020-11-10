@@ -125,3 +125,7 @@ def cross(p1,p2,p3):
     y2=p3[1]-p1[1]
     return x1*y2-x2*y1
 
+def Region_Check(region, point):
+    if point[0] >= region.x_low and point[0] <= region.x_up and point[1] >= region.y_low and point[1] <= region.y_up:
+        return True
+    return False

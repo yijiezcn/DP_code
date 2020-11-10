@@ -27,7 +27,7 @@ q.search(0)
 for i in range(10):
     point_rand = Sample_Region(R)
     Extend(G, obstacles, points, point_rand, q, goal)
-    Replan(q,G,points)
+    Replan(q,G,points,goal)
 
 print(q.Que())
 print(G.Get_Edges())
