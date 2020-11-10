@@ -2,6 +2,7 @@ from Graph_RRT import *
 from RRT_Function import *
 from queue import *
 
+
 # domain
 R = Region(0, 100, 0, 100)
 
@@ -37,6 +38,7 @@ for i in range(15):
 print(q.Que())
 print(G.Get_Edges())
 print(G.Get_Nodes())
+
 
 
 
