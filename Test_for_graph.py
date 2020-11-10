@@ -1,5 +1,6 @@
 from Graph_RRT import *
 from RRT_Function import *
+from queue import *
 
 # domain
 R = Region(0, 100, 0, 100)
@@ -18,10 +19,6 @@ G = Graph()
 G.Add_Node(0)
 P0 = Point(0, 0, 0, 0)
 points = [P0]
-
-q = Queue()
-print(q.Get_key(2))
-
 
 
 # for i in range(10):
