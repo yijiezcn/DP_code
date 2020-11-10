@@ -132,3 +132,51 @@ def Region_Check(region, point):
     if point[0] >= region.x_low and point[0] <= region.x_up and point[1] >= region.y_low and point[1] <= region.y_up:
         return True
     return False
+
+def RRT_Body():
+    # working domain
+    R = Region(0, 100, 0, 100)
+
+    # obstacle
+    o1 = Region(50, 60, 50, 60)
+    obstacles = [o1]
+
+    # goal
+    goal = Region(10, 20, 10, 20)
+    # goal = Region(90, 100, 90, 100)
+
+    # graph
+    G = Graph()
+
+    # initial point
+    G.Add_Node(0)
+    P0 = Point(0, 0, 0, 0)
+    points = [P0]
+
+    # initial queue
+    q = Queue()
+
+    goal_set = []
+
+    for i in range(15):
+        point_rand = Sample_Region(R)
+        Extend(G, obstacles, points, point_rand, q, goal)
+        Replan(q, G, points, goal)
+        x_new = len(points) - 1
+        if Region_Check(goal, points[x_new].xy()):
+            goal_set.append(x_new)
+        print("que,", q.Que())
+        print("_________________________")
+
+    G.Delete_Edge()
+
+    nodes = G.Get_Nodes()
+
+    for node in nodes:
+        if points[node].parent() != -1:
+            G.Add_Edge([points[node].parent(), node])
+
+    print(G.Get_Edges())
+    print(goal_set)
+
+

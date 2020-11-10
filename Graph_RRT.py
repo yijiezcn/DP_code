@@ -45,7 +45,7 @@ class Region:
 
 class Point:
 
-    def __init__(self, x, y, g=float('inf'), lmc=float('inf'), parent=float('inf')):
+    def __init__(self, x, y, g=float('inf'), lmc=float('inf'), parent=-1):
         self._X = [x, y]
         self._g = g
         self._lmc = lmc
