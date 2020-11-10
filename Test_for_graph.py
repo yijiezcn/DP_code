@@ -6,11 +6,12 @@ from queue import *
 R = Region(0, 100, 0, 100)
 
 # obstacle
-o1 = Region(30, 60, 30, 60)
+o1 = Region(50, 60, 50, 60)
 obstacles = [o1]
 
 # goal
-goal = Region(90, 100, 90, 100)
+goal = Region(10, 20, 10, 20)
+# goal = Region(90, 100, 90, 100)
 
 # graph
 G = Graph()
@@ -24,10 +25,14 @@ points = [P0]
 q = Queue()
 q.search(0)
 
-for i in range(10):
+
+
+for i in range(15):
     point_rand = Sample_Region(R)
     Extend(G, obstacles, points, point_rand, q, goal)
-    Replan(q,G,points,goal)
+    Replan(q, G, points, goal)
+    print("que,", q.Que())
+    print("_________________________")
 
 print(q.Que())
 print(G.Get_Edges())

@@ -52,7 +52,7 @@ def Near(G, x_new, points):
 def Initialize(x_1, x_2, points):
     p1 = points[x_1]
     p2 = points[x_2]
-    p1.Add_g = float('inf')
+    p1.Add_g(float('inf'))
     p1.Add_lmc(p2.g()+Distance_Points(p1.xy(), p2.xy()))
     p1.Add_parent(x_2)
 
@@ -60,16 +60,18 @@ def Initialize(x_1, x_2, points):
 
 def Extend(G, Obstacles, points, point_random, queue, goal):
     x_nearest = Nearest(G, points, point_random)
-    print("x_nearest is", x_nearest, points[x_nearest].xy())
+    # print("x_nearest is", x_nearest, points[x_nearest].xy())
     x_new = Steer(x_nearest, point_random, points)
+    if Region_Check(goal, points[x_new].xy()):
+        print("Yes")
     print("x_new is",x_new, points[x_new].xy())
     if Obstacles_Free(Obstacles, points[x_nearest].xy(), points[x_new].xy()):
         Initialize(x_new, x_nearest, points)
-        print("lmc of x_new is", points[x_new].lmc())
+        # print("lmc of x_new is", points[x_new].lmc())
         near_nodes = Near(G, x_new, points)
-        print(near_nodes)
-        print("Now have points", len(points))
-        print("_________________________")
+        # print(near_nodes)
+        # print("Now have points", len(points))
+        # print("_________________________")
         for node in near_nodes:
             if Obstacles_Free(Obstacles, points[node].xy(), points[x_new].xy()):
                 if points[x_new].lmc() > points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()):
@@ -83,9 +85,9 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
 
 def Obstacles_Free(Obstacles, X1, X2):
     for Obstacle in Obstacles:
-        if not Obstacle_Free(Obstacle, X1, X2):
-            return False
-    return True
+        if Obstacle_Free(Obstacle, X1, X2):
+            return True
+    return False
 
 
 def Obstacle_Free(Obstacle, X1, X2):

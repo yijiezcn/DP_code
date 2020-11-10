@@ -19,14 +19,28 @@ class Graph:
     def Get_Edges(self):
         return self._edge
 
+    def succ(self, x):
+        succ = []
+        for edge in self._edge:
+            if edge[0] == x:
+                succ.append(edge[1])
+        return succ
+
+    def pred(self, x):
+        pred = []
+        for edge in self._edge:
+            if edge[1] == x:
+                pred.append(edge[0])
+        return pred
+
 
 class Region:
 
-    def __init__(self,x_low, x_up, y_low, y_up):
-        Region.x_low = x_low
-        Region.x_up = x_up
-        Region.y_low = y_low
-        Region.y_up = y_up
+    def __init__(self, x_low, x_up, y_low, y_up):
+        self.x_low = x_low
+        self.x_up = x_up
+        self.y_low = y_low
+        self.y_up = y_up
 
 
 class Point:
