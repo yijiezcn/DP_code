@@ -19,7 +19,7 @@ def Distance_Points(X1, X2):
 
 
 def Nearest(G, points, point_random):
-    nodes = G.Get_Node()
+    nodes = G.Get_Nodes()
     D = 10000000
     x_nearest = -1
     for node in nodes:
@@ -42,7 +42,7 @@ def Steer(x_nearest, point_random, points):
 
 
 def Near(G, x_new, points):
-    nodes = G.Get_Node()
+    nodes = G.Get_Nodes()
     near_nodes = []
     for node in nodes:
         if Distance_Points(points[node].xy(), points[x_new].xy()) <= Near_r:
@@ -51,20 +51,42 @@ def Near(G, x_new, points):
 
 
 def Initialize(x_1, x_2, points):
-    points[x_1].Add_g = -1
-
+    p1 = points[x_1]
+    p2 = points[x_2]
+    p1.Add_g = float('inf')
+    p1.Add_lmc(p2.g()+Distance_Points(p1.xy(), p2.xy()))
+    p1.Add_parent(x_2)
 
 
 
 def Extend(G, Obstacles, points, point_random):
     x_nearest = Nearest(G, points, point_random)
+    print("x_nearest is", x_nearest, points[x_nearest].xy())
     x_new = Steer(x_nearest, point_random, points)
-    if Obstacle_Free(Obstacles, points[x_nearest].xy(), points[x_new].xy()):
+    print("x_new is",x_new, points[x_new].xy())
+    if Obstacles_Free(Obstacles, points[x_nearest].xy(), points[x_new].xy()):
+        Initialize(x_new, x_nearest, points)
+        print("lmc of x_new is", points[x_new].lmc())
         near_nodes = Near(G, x_new, points)
+        print(near_nodes)
+        print("Now have points", len(points))
+        print("_________________________")
+        for node in near_nodes:
+            if Obstacles_Free(Obstacles, points[node].xy(), points[x_new].xy()):
+                if points[x_new].lmc() > points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()):
+                    points[x_new].Add_lmc(points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()))
+                G.Add_Edge([node, x_new])
+                G.Add_Edge([x_new, node])
+        G.Add_Node(x_new)
 
 
 
 
+def Obstacles_Free(Obstacles, X1, X2):
+    for Obstacle in Obstacles:
+        if not Obstacle_Free(Obstacle, X1, X2):
+            return False
+    return True
 
 
 def Obstacle_Free(Obstacle, X1, X2):

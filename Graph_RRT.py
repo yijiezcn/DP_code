@@ -2,17 +2,20 @@
 class Graph:
 
     def __init__(self):
-        self.edge = []
-        self.node = []
+        self._edge = []
+        self._node = []
 
     def Add_Edge(self, edge):
-        self.edge.append(edge)
+        self._edge.append(edge)
 
     def Add_Node(self, node):
-        self.node.append(node)
+        self._node.append(node)
 
-    def Get_Node(self):
-        return self.node
+    def Get_Nodes(self):
+        return self._node
+
+    def Get_Edges(self):
+        return self._edge
 
 
 class Region:
@@ -26,20 +29,29 @@ class Region:
 
 class Point:
 
-    def __init__(self, x, y):
-        self.X = [x, y]
-        self.g = 0
-        self.lmc = 0
-        self.parent = -1
+    def __init__(self, x, y, g=float('inf'), lmc=float('inf'), parent=float('inf')):
+        self._X = [x, y]
+        self._g = g
+        self._lmc = lmc
+        self._parent = parent
 
     def xy(self):
-        return self.X
+        return self._X
+
+    def g(self):
+        return self._g
+
+    def lmc(self):
+        return self._lmc
+
+    def parent(self):
+        return self._parent
 
     def Add_g(self, g):
-        self.g = g
+        self._g = g
 
     def Add_lmc(self, lmc):
-        self.lmc = lmc
+        self._lmc = lmc
 
     def Add_parent(self, parent):
-        self.parent = parent
+        self._parent = parent
