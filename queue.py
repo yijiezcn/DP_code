@@ -89,14 +89,14 @@ def Replan(queue, G, points, goal):
     nodes = G.Get_Nodes()
     key_goal = [float('inf'), float('inf')]
     flag = 0
-    print(nodes)
+    # print(nodes)
     for node in nodes:
         if RF.Region_Check(goal, points[node].xy()):
             flag = 1
             key_g = [points[node].lmc(), points[node].lmc()]
             if Key_LQ(key_g, key_goal):
                 key_goal = key_g
-                print(key_goal)
+                # print(key_goal)
     if flag == 0:
         key_goal = [0, 0]
     while Key_LQ(key_min, key_goal):
@@ -104,12 +104,12 @@ def Replan(queue, G, points, goal):
         # print(points[x_min].g())
         queue.delete(x_min)
         succ = G.succ(x_min)
-        print("Succ", succ)
+        # print("Succ", succ)
         for next_node in succ:
             if points[next_node].lmc() > \
                 points[x_min].g() + RF.Distance_Points(points[next_node].xy(),points[next_node].xy()):
                 points[next_node].Add_lmc \
-                (points[x_min].g() + RF.Distance_Points(points[next_node].xy(), points[next_node].xy()))
+                (points[x_min].g() + RF.Distance_Points(points[x_min].xy(), points[next_node].xy()))
                 points[next_node].Add_parent(x_min)
                 Update_Queue(next_node, queue,points, goal)
         x_min, key_min = queue.findmin()

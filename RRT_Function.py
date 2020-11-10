@@ -62,9 +62,9 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
     x_nearest = Nearest(G, points, point_random)
     # print("x_nearest is", x_nearest, points[x_nearest].xy())
     x_new = Steer(x_nearest, point_random, points)
-    if Region_Check(goal, points[x_new].xy()):
-        print("Yes")
-    print("x_new is",x_new, points[x_new].xy())
+    # if Region_Check(goal, points[x_new].xy()):
+    #     print("Yes")
+    # print("x_new is",x_new, points[x_new].xy())
     if Obstacles_Free(Obstacles, points[x_nearest].xy(), points[x_new].xy()):
         Initialize(x_new, x_nearest, points)
         # print("lmc of x_new is", points[x_new].lmc())
@@ -138,11 +138,13 @@ def RRT_Body():
     R = Region(0, 100, 0, 100)
 
     # obstacle
-    o1 = Region(50, 60, 50, 60)
+    # o1 = Region(50, 60, 50, 60)
+    o1 = Region(10, 20, 10, 20)
     obstacles = [o1]
 
+
     # goal
-    goal = Region(10, 20, 10, 20)
+    goal = Region(30, 40, 30, 40)
     # goal = Region(90, 100, 90, 100)
 
     # graph
@@ -158,14 +160,23 @@ def RRT_Body():
 
     goal_set = []
 
-    for i in range(15):
+    for i in range(500):
         point_rand = Sample_Region(R)
         Extend(G, obstacles, points, point_rand, q, goal)
-        Replan(q, G, points, goal)
+
         x_new = len(points) - 1
         if Region_Check(goal, points[x_new].xy()):
             goal_set.append(x_new)
-        print("que,", q.Que())
+        print(points[x_new].xy())
+
+        # if i > 2:
+        #     print("LMC is", points[2].lmc())
+
+        Replan(q, G, points, goal)
+
+        # if i > 2:
+        #     print("LMC is", points[2].lmc())
+        print(i)
         print("_________________________")
 
     G.Delete_Edge()
@@ -179,4 +190,15 @@ def RRT_Body():
     print(G.Get_Edges())
     print(goal_set)
 
+    min_lmc = float('inf')
+    min_index = 0
+    for g in goal_set:
+        if points[g].lmc() < min_lmc:
+            min_lmc = points[g].lmc()
+            min_index = g
+        # print("Point ", g, " lmc is ", points[g].lmc())
 
+    path_index = min_index
+    while path_index != -1:
+        print("Path: ",path_index, points[path_index].xy(),"; Lmc is", points[path_index].lmc())
+        path_index = points[path_index].parent()
