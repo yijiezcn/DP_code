@@ -75,9 +75,11 @@ def Extend(G, Obstacles, points, point_random):
             if Obstacles_Free(Obstacles, points[node].xy(), points[x_new].xy()):
                 if points[x_new].lmc() > points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()):
                     points[x_new].Add_lmc(points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()))
+                    points[x_new].Add_parent(node)
                 G.Add_Edge([node, x_new])
                 G.Add_Edge([x_new, node])
         G.Add_Node(x_new)
+
 
 
 
