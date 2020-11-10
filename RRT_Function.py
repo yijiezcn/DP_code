@@ -61,7 +61,6 @@ def Initialize(x_1, x_2, points, goal):
     p1.Add_parent(x_2)
 
 
-
 def Extend(G, Obstacles, points, point_random, queue, goal):
     x_nearest = Nearest(G, points, point_random)
     # print("x_nearest is", x_nearest, points[x_nearest].xy())
@@ -87,13 +86,11 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
         G.Add_Node(x_new)
         Update_Queue(x_new, queue, points, goal)
 
-
 def Obstacles_Free(Obstacles, X1, X2):
     for Obstacle in Obstacles:
         if Obstacle_Free(Obstacle, X1, X2):
             return True
     return False
-
 
 def Obstacle_Free(Obstacle, X1, X2):
     if ( X1[0] >= Obstacle.x_low and  X1[0] <= Obstacle.x_up and X1[1] >= Obstacle.y_low and X1[1] <= Obstacle.y_up ) \
@@ -109,7 +106,6 @@ def Obstacle_Free(Obstacle, X1, X2):
     else:
         return True
 
-
 def segment(p1, p2, p3, p4):
     if (max(p1[0], p2[0]) >= min(p3[0], p4[0])
             and max(p3[0], p4[0]) >= min(p1[0], p2[0])
@@ -124,14 +120,12 @@ def segment(p1, p2, p3, p4):
         D = 0
     return D
 
-
 def cross(p1,p2,p3):
     x1=p2[0]-p1[0]
     y1=p2[1]-p1[1]
     x2=p3[0]-p1[0]
     y2=p3[1]-p1[1]
     return x1*y2-x2*y1
-
 
 def Region_Check(region, point):
     if point[0] >= region.x_low and point[0] <= region.x_up and point[1] >= region.y_low and point[1] <= region.y_up:
