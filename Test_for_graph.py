@@ -20,13 +20,18 @@ G.Add_Node(0)
 P0 = Point(0, 0, 0, 0)
 points = [P0]
 
+# initial queue
+q = Queue()
+q.search(0)
 
-# for i in range(10):
-#     point_rand = Sample_Region(R)
-#     Extend(G, obstacles, points, point_rand)
+for i in range(10):
+    point_rand = Sample_Region(R)
+    Extend(G, obstacles, points, point_rand, q, goal)
+    Replan(q,G,points)
 
-# print(G.Get_Edges())
-# print(G.Get_Nodes())
+print(q.Que())
+print(G.Get_Edges())
+print(G.Get_Nodes())
 
 
 

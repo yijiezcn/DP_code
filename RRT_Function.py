@@ -1,9 +1,8 @@
-import Graph_RRT as GR
+from Graph_RRT import *
 import random
 import numpy
 from Constant import *
-from Graph_RRT import *
-
+from queue import *
 
 def Sample_Region(region):
     x = random.uniform(region.x_low, region.x_up)
@@ -59,7 +58,7 @@ def Initialize(x_1, x_2, points):
 
 
 
-def Extend(G, Obstacles, points, point_random):
+def Extend(G, Obstacles, points, point_random, queue, goal):
     x_nearest = Nearest(G, points, point_random)
     print("x_nearest is", x_nearest, points[x_nearest].xy())
     x_new = Steer(x_nearest, point_random, points)
@@ -79,9 +78,7 @@ def Extend(G, Obstacles, points, point_random):
                 G.Add_Edge([node, x_new])
                 G.Add_Edge([x_new, node])
         G.Add_Node(x_new)
-
-
-
+        Update_Queue(x_new, queue, points, goal)
 
 
 def Obstacles_Free(Obstacles, X1, X2):

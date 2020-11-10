@@ -1,12 +1,60 @@
-from Graph_RRT import *
-from RRT_Function import *
+import RRT_Function as RF
+
+class Queue():
+
+    def __init__(self):
+        self.list = []
+
+    def Que(self):
+        return self.list
+
+    def insert(self, x, key):
+        if self.search(x):
+            print("We already have one")
+            return False
+        q = [x, key]
+        self.list.append(q)
+
+    def search(self, x):
+        for q in self.list:
+            if q[0] == x:
+                return True
+        else:
+            return False
+
+    def update(self, x, key):
+        for q in self.list:
+            if q[0] == x:
+                q[1] = key
+                return True
+        return False
+
+    def delete(self, x):
+        for index, q  in enumerate(self.list):
+            if q[0] == x:
+                self.list.pop(index)
+                return True
+        return False
+
+    def Get_key(self, x):
+        for q in self.list:
+            if q[0] == x:
+                return q
+            return None
+
+    def findmin(self):
+        min = self.list[0]
+        for q in self.list:
+            if Key_LQ(q[1], min[1]):
+                min = q
+        return min[0], min[1]
 
 
 def h(P, goal_region):
     x_goal = (goal_region.x_low + goal_region.x_up)/2
     y_goal = (goal_region.y_low + goal_region.y_up)/2
     goal = [x_goal, y_goal]
-    h = Distance_Points(P.xy(), goal)
+    h = RF.Distance_Points(P.xy(), goal)
     return h
 
 
@@ -15,11 +63,24 @@ def Key(P, goal_region):
     return k
 
 
+def Key_LQ(key1, key2):
+    if key1[0] < key2[0] or (key1[0] == key2[0] and key1[1] < key2[1]):
+        return True
+    else:
+        return False
+
+
 def Update_Queue(x, queue, points, goal):
     point = points[x]
-    if point.g() != point.lmc() and queue.serach(x):
+    if point.g() != point.lmc() and queue.search(x):
         queue.update(x, Key(point, goal))
-    elif point.g() != point.lmc() and not queue.serach(x):
+    elif point.g() != point.lmc() and not queue.search(x):
         queue.insert(x, Key(point, goal))
-    elif point.g() == point.lmc() and queue.serach(x):
+    elif point.g() == point.lmc() and queue.search(x):
         queue.delete(x)
+
+
+def Replan(queue, G, points):
+    x, key = queue.findmin()
+    nodes = G.Get_Nodes()
+    print(nodes)

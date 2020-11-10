@@ -1,4 +1,3 @@
-
 class Graph:
 
     def __init__(self):
@@ -60,42 +59,3 @@ class Point:
         self._parent = parent
 
 
-class Queue():
-
-    def __init__(self):
-        self.list = []
-
-    def insert(self, x, key):
-        if self.serach(x):
-            print("We already have one")
-            return False
-        q = [x, key]
-        self.list.append(q)
-
-    def serach(self,x):
-        for q in self.list:
-            if q[0] == x:
-                return True
-        else:
-            return False
-
-    def update(self, x, key):
-        for q in self.list:
-            if q[0] == x:
-                q[1] = key
-                return True
-        return False
-
-    def delete(self, x):
-        for index, q  in enumerate(self.list):
-            if q[0] == x:
-                self.list.pop(index)
-                return True
-        return False
-
-
-    def Get_key(self, x):
-        for q in self.list:
-            if q[0] == x:
-                return q
-            return None
