@@ -3,6 +3,58 @@ import random
 import numpy
 from Constant import *
 
+class Queue():
+
+    def __init__(self):
+        self.list = []
+
+    def Que(self):
+        return self.list
+
+    def insert(self, x, key):
+        if self.search(x):
+            print("We already have one")
+            return False
+        q = [x, key]
+        self.list.append(q)
+
+    def search(self, x):
+        for q in self.list:
+            if q[0] == x:
+                return True
+        else:
+            return False
+
+    def update(self, x, key):
+        for q in self.list:
+            if q[0] == x:
+                q[1] = key
+                return True
+        return False
+
+    def delete(self, x):
+        for index, q  in enumerate(self.list):
+            if q[0] == x:
+                self.list.pop(index)
+                return True
+        return False
+
+    def Get_key(self, x):
+        for q in self.list:
+            if q[0] == x:
+                return q
+            return None
+
+    def findmin(self):
+        if len(self.list) == 0:
+            return None, None
+        min = self.list[0]
+        for q in self.list:
+            if Key_LQ(q[1], min[1]):
+                min = q
+        return min[0], min[1]
+
+
 def Sample_Region(region):
     """Generate a random sample given a region 
 
@@ -227,60 +279,6 @@ def RRT_Body():
     while path_index != -1:
         print("Path: ",path_index, points[path_index].xy(),"; Lmc is", points[path_index].lmc())
         path_index = points[path_index].parent()
-
-
-
-class Queue():
-
-    def __init__(self):
-        self.list = []
-
-    def Que(self):
-        return self.list
-
-    def insert(self, x, key):
-        if self.search(x):
-            print("We already have one")
-            return False
-        q = [x, key]
-        self.list.append(q)
-
-    def search(self, x):
-        for q in self.list:
-            if q[0] == x:
-                return True
-        else:
-            return False
-
-    def update(self, x, key):
-        for q in self.list:
-            if q[0] == x:
-                q[1] = key
-                return True
-        return False
-
-    def delete(self, x):
-        for index, q  in enumerate(self.list):
-            if q[0] == x:
-                self.list.pop(index)
-                return True
-        return False
-
-    def Get_key(self, x):
-        for q in self.list:
-            if q[0] == x:
-                return q
-            return None
-
-    def findmin(self):
-        if len(self.list) == 0:
-            return None, None
-        min = self.list[0]
-        for q in self.list:
-            if Key_LQ(q[1], min[1]):
-                min = q
-        return min[0], min[1]
-
 
 def h(P, goal_region):
     x_goal = (goal_region.x_low + goal_region.x_up)/2
