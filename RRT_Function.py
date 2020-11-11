@@ -2,9 +2,16 @@ from Graph_RRT import *
 import random
 import numpy
 from Constant import *
-from queue import *
 
 def Sample_Region(region):
+    """Generate a random sample given a region 
+
+    Args:
+        region (class): Contains the position info of the region
+
+    Returns:
+        list: Coordinates of the generated point
+    """
     x = random.uniform(region.x_low, region.x_up)
     y = random.uniform(region.y_low, region.y_up)
     X = [x, y]
@@ -12,12 +19,31 @@ def Sample_Region(region):
 
 
 def Distance_Points(X1, X2):
+    """Evaluate l2 norm between two points 
+
+    Args:
+        X1 (list): Coordinates of the first point 
+        X2 (list): Coordinates of the second point 
+
+    Returns:
+        float: the l2 distance
+    """
     A = numpy.square(X1[0] - X2[0]) + numpy.square(X1[1] - X2[1])
     D = numpy.sqrt(A)
     return D
 
 
 def Nearest(G, points, point_random):
+    """[summary]
+
+    Args:
+        G ([type]): [description]
+        points ([type]): [description]
+        point_random ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     nodes = G.Get_Nodes()
     D = 10000000
     x_nearest = -1
@@ -61,7 +87,6 @@ def Initialize(x_1, x_2, points, goal):
     p1.Add_parent(x_2)
 
 
-
 def Extend(G, Obstacles, points, point_random, queue, goal):
     x_nearest = Nearest(G, points, point_random)
     # print("x_nearest is", x_nearest, points[x_nearest].xy())
@@ -80,20 +105,18 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
             if Obstacles_Free(Obstacles, points[node].xy(), points[x_new].xy()):
                 if points[x_new].lmc() > points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()):
                     points[x_new].Add_lmc(points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()))
-                    if not Region_Check(goal, points[node].xy()) or not Region_Check(goal, points[x_new].xy()):
-                        points[x_new].Add_parent(node)
+                    if not Region_Check(goal, points[node].xy()) or not Region_Check(goal, points[x_new].xy()): # what is this for?
+                        points[x_new].Add_parent(node) # lmc update?
                 G.Add_Edge([node, x_new])
                 G.Add_Edge([x_new, node])
         G.Add_Node(x_new)
         Update_Queue(x_new, queue, points, goal)
-
 
 def Obstacles_Free(Obstacles, X1, X2):
     for Obstacle in Obstacles:
         if Obstacle_Free(Obstacle, X1, X2):
             return True
     return False
-
 
 def Obstacle_Free(Obstacle, X1, X2):
     if ( X1[0] >= Obstacle.x_low and  X1[0] <= Obstacle.x_up and X1[1] >= Obstacle.y_low and X1[1] <= Obstacle.y_up ) \
@@ -109,7 +132,6 @@ def Obstacle_Free(Obstacle, X1, X2):
     else:
         return True
 
-
 def segment(p1, p2, p3, p4):
     if (max(p1[0], p2[0]) >= min(p3[0], p4[0])
             and max(p3[0], p4[0]) >= min(p1[0], p2[0])
@@ -124,14 +146,12 @@ def segment(p1, p2, p3, p4):
         D = 0
     return D
 
-
 def cross(p1,p2,p3):
     x1=p2[0]-p1[0]
     y1=p2[1]-p1[1]
     x2=p3[0]-p1[0]
     y2=p3[1]-p1[1]
     return x1*y2-x2*y1
-
 
 def Region_Check(region, point):
     if point[0] >= region.x_low and point[0] <= region.x_up and point[1] >= region.y_low and point[1] <= region.y_up:
@@ -157,7 +177,7 @@ def RRT_Body():
 
     # initial point
     G.Add_Node(0)
-    P0 = Point(0, 0, 0, 0)
+    P0 = Point(0, 0, 0, 0) # Is it the right way to initialize? LMC shoule be \infty?
     points = [P0]
 
     # initial queue
@@ -207,3 +227,120 @@ def RRT_Body():
     while path_index != -1:
         print("Path: ",path_index, points[path_index].xy(),"; Lmc is", points[path_index].lmc())
         path_index = points[path_index].parent()
+
+
+
+class Queue():
+
+    def __init__(self):
+        self.list = []
+
+    def Que(self):
+        return self.list
+
+    def insert(self, x, key):
+        if self.search(x):
+            print("We already have one")
+            return False
+        q = [x, key]
+        self.list.append(q)
+
+    def search(self, x):
+        for q in self.list:
+            if q[0] == x:
+                return True
+        else:
+            return False
+
+    def update(self, x, key):
+        for q in self.list:
+            if q[0] == x:
+                q[1] = key
+                return True
+        return False
+
+    def delete(self, x):
+        for index, q  in enumerate(self.list):
+            if q[0] == x:
+                self.list.pop(index)
+                return True
+        return False
+
+    def Get_key(self, x):
+        for q in self.list:
+            if q[0] == x:
+                return q
+            return None
+
+    def findmin(self):
+        if len(self.list) == 0:
+            return None, None
+        min = self.list[0]
+        for q in self.list:
+            if Key_LQ(q[1], min[1]):
+                min = q
+        return min[0], min[1]
+
+
+def h(P, goal_region):
+    x_goal = (goal_region.x_low + goal_region.x_up)/2
+    y_goal = (goal_region.y_low + goal_region.y_up)/2
+    goal = [x_goal, y_goal]
+    h = Distance_Points(P.xy(), goal)
+    return h
+
+
+def Key(P, goal_region):
+    k = [P.lmc() + h(P, goal_region), P.lmc()]
+    return k
+
+
+def Key_LQ(key1, key2):
+    if key1 == None:
+        return False
+    if key1[0] < key2[0] or (key1[0] == key2[0] and key1[1] < key2[1]):
+        return True
+    else:
+        return False
+
+
+def Update_Queue(x, queue, points, goal):
+    point = points[x]
+    if point.g() != point.lmc() and queue.search(x):
+        queue.update(x, Key(point, goal))
+    elif point.g() != point.lmc() and not queue.search(x):
+        queue.insert(x, Key(point, goal))
+    elif point.g() == point.lmc() and queue.search(x):
+        queue.delete(x)
+
+
+def Replan(queue, G, points, goal):
+    x_min, key_min = queue.findmin()
+    nodes = G.Get_Nodes()
+    key_goal = [float('inf'), float('inf')]
+    flag = 0
+    # print(nodes)
+    for node in nodes:
+        if Region_Check(goal, points[node].xy()):
+            flag = 1
+            key_g = [points[node].lmc(), points[node].lmc()]
+            if Key_LQ(key_g, key_goal):
+                key_goal = key_g
+                # print(key_goal)
+    if flag == 0:
+        key_goal = [0, 0]
+    while Key_LQ(key_min, key_goal):
+        points[x_min].Add_g(points[x_min].lmc())
+        # print(points[x_min].g())
+        queue.delete(x_min)
+        succ = G.succ(x_min)
+        # print("Succ", succ)
+        for next_node in succ:
+            if points[next_node].lmc() > \
+                points[x_min].g() + Distance_Points(points[next_node].xy(),points[next_node].xy()):
+                points[next_node].Add_lmc \
+                (points[x_min].g() + Distance_Points(points[x_min].xy(), points[next_node].xy()))
+                points[next_node].Add_parent(x_min)
+                Update_Queue(next_node, queue,points, goal)
+        x_min, key_min = queue.findmin()
+

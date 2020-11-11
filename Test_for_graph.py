@@ -2,7 +2,6 @@ from Graph_RRT import *
 from RRT_Function import *
 from queue import *
 
-
 # # domain
 # R = Region(0, 100, 0, 100)
 #
