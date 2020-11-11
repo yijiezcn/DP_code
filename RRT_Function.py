@@ -5,6 +5,14 @@ from Constant import *
 from queue import *
 
 def Sample_Region(region):
+    """Generate a random sample given a region 
+
+    Args:
+        region (class): Contains the position info of the region
+
+    Returns:
+        list: Coordinates of the generated point
+    """
     x = random.uniform(region.x_low, region.x_up)
     y = random.uniform(region.y_low, region.y_up)
     X = [x, y]
@@ -12,12 +20,31 @@ def Sample_Region(region):
 
 
 def Distance_Points(X1, X2):
+    """Evaluate l2 norm between two points 
+
+    Args:
+        X1 (list): Coordinates of the first point 
+        X2 (list): Coordinates of the second point 
+
+    Returns:
+        float: the l2 distance
+    """
     A = numpy.square(X1[0] - X2[0]) + numpy.square(X1[1] - X2[1])
     D = numpy.sqrt(A)
     return D
 
 
 def Nearest(G, points, point_random):
+    """[summary]
+
+    Args:
+        G ([type]): [description]
+        points ([type]): [description]
+        point_random ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     nodes = G.Get_Nodes()
     D = 10000000
     x_nearest = -1
@@ -79,8 +106,8 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
             if Obstacles_Free(Obstacles, points[node].xy(), points[x_new].xy()):
                 if points[x_new].lmc() > points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()):
                     points[x_new].Add_lmc(points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()))
-                    if not Region_Check(goal, points[node].xy()) or not Region_Check(goal, points[x_new].xy()):
-                        points[x_new].Add_parent(node)
+                    if not Region_Check(goal, points[node].xy()) or not Region_Check(goal, points[x_new].xy()): # what is this for?
+                        points[x_new].Add_parent(node) # lmc update?
                 G.Add_Edge([node, x_new])
                 G.Add_Edge([x_new, node])
         G.Add_Node(x_new)
@@ -151,7 +178,7 @@ def RRT_Body():
 
     # initial point
     G.Add_Node(0)
-    P0 = Point(0, 0, 0, 0)
+    P0 = Point(0, 0, 0, 0) # Is it the right way to initialize? LMC shoule be \infty?
     points = [P0]
 
     # initial queue
