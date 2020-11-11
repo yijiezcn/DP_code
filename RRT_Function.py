@@ -2,7 +2,6 @@ from Graph_RRT import *
 import random
 import numpy
 from Constant import *
-# from queue import *
 
 def Sample_Region(region):
     """Generate a random sample given a region 
