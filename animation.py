@@ -1,32 +1,36 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 class Animation():
-    PAUSE_TIME = 2
+    PAUSE_TIME = 0.01
     FIG_SIZE = 5
-    def __init__(self,start_info,end_info,obs_info):
+    def __init__(self,domain_info,start_info,end_info,obs_info):
         """Plot start,end and obstacles
 
         Args:
+            domain_info (list): Infor of the doamin, see self.draw_quad.
             start_info (list): Info of start_zone, see self.draw_quad.
             end_info (lsit): Info of end_zone, see self.draw_quad.
             obs_info (2d list): Each row is the info for an obstacle.
         """
         plt.ion()
+        # plt.axis('off')
         self.fig = plt.figure(figsize=(self.FIG_SIZE,self.FIG_SIZE))
+        self.draw_quad(domain_info, color='white')
         self.draw_quad(start_info, color='yellow')
         self.draw_quad(end_info, color='blue')
         for info in obs_info:
-            self.draw_quad(info, color='red',PAUSE=1)
+            self.draw_quad(info, color='red',PAUSE=0)
 
 
-    def draw_quad(self, info, color='red', PAUSE=1):
+    def draw_quad(self, info, color='red', PAUSE=0):
         """Draw quadralateral
 
         Args:
             info (list): [center_x, center_y, width, height]
             color (str, optional): Defaults to 'red'.
-            PAUSE (bool, optional): Flat for pause after plot. Pause if TRUE.
+            PAUSE (bool, optional): Falg for pause after plot. Pause if TRUE.
 
         Returns:
             [type]: Plotted quad
@@ -41,7 +45,7 @@ class Animation():
         # plt.pause(2)
         return quad
 
-    def draw_node(self, center, marker='o', ms=5, color='#acf800', PAUSE=1):
+    def draw_node(self, center, marker='o', ms=5, color='#acf800', PAUSE=0): 
         """Draw node 
 
         Args:
@@ -49,7 +53,7 @@ class Animation():
             marker (str, optional): markerstyle. Defaults to 'o'.
             ms (int, optional): Markersize . Defaults to 5.
             color (str, optional): Defaults to '#acf800'--light green.
-            PAUSE (bool, optional): Flat for pause after plot. Pause if TRUE.
+            PAUSE (bool, optional): Flag for pause after plot. Pause if TRUE.
 
         Returns:
             [type]: Plotted node
@@ -59,30 +63,50 @@ class Animation():
             plt.pause(self.PAUSE_TIME)
         return node
 
-    def draw_edge(self, info, lw=1, color='green', PAUSE=1):
+    def draw_multi_nodes(self, nodes_info, marker='o', ms=2, color='#ff0000', PAUSE=0, ls=''):
+        """Draw multiple nodes, can not erase single node afterwards
+
+        Args:
+            nodes_info (2d list or array): Shape=[num_nodes, 2]. Each row is the xy coordinates for a node.
+            marker (str, optional): Markerstyle. Defaults to 'o'.
+            ms (int, optional): Markersize. Defaults to 5.
+            color (str, optional): Defaults to '#ff0000'--red.
+            PAUSE (bool, optional): Flag for pause after plot. Pause if TRUE.
+
+        Returns:
+            [type]: [description]
+        """
+        nodes_info = np.array(nodes_info).T
+        nodes = plt.plot(nodes_info[0],nodes_info[1],marker=marker,ms=ms,color=color, ls='')
+        if PAUSE:
+            plt.pause(self.PAUSE_TIME)
+        return nodes
+
+
+    def draw_edge(self, info, lw=0.5, color='green', PAUSE=0):
         """Draw edge
 
         Args:
             info (list): [start_x,start_y,end_x,end_y]
             lw (int, optional): linewidth. Defaults to 1.
             color (str, optional): Defaults to 'green'.
-            PAUSE (bool, optional): Flat for pause after plot. Pause if TRUE.
+            PAUSE (bool, optional): Flag for pause after plot. Pause if TRUE.
 
         Returns:
             [type]: Plotted node
         """
-        edge = plt.plot([info[0],info[2]],[info[1],info[3]])
+        edge = plt.plot([info[0],info[2]],[info[1],info[3]],lw=lw,color=color)
         if PAUSE:
             plt.pause(self.PAUSE_TIME)
         return edge
 
-    def erase(self, obj, single=1, PAUSE=1):
+    def erase(self, obj, single=1, PAUSE=0): 
         """erase plotted elements 
 
         Args:
             obj (plotted element or list): If list, will erase everythin in the list.
             single (int, optional): Erase single obj if TRUE, otherwise multiple.
-            PAUSE (bool, optional): Flat for pause after plot. Pause if TRUE.
+            PAUSE (bool, optional): Flag for pause after plot. Pause if TRUE.
         """
         if single:
             obj.pop(0).remove()
@@ -93,6 +117,12 @@ class Animation():
                 _.pop(0).remove()
                 if PAUSE:
                     plt.pause(self.PAUSE_TIME)
+
+    def pause(self, time):
+        plt.pause(time)
+
+    def save(self,path):
+        plt.savefig(path)
             
     def quad_coor_conv(self, center, size):
         """Covert [center, sieze] of quad into x,y coordinates 
@@ -111,18 +141,19 @@ class Animation():
         return x_coor, y_coor
 
 def main():
-    start_info = [0,0,1,1]
-    end_info = [4,4,1,1]
-    obs_info = [[-1,-1,1,1],[1,-1,1,1]]
-    plot = Animation(start_info,end_info,obs_info)
+    domain_info = [0,0,5,5]
+    start_info  = [0,0,1,1]
+    end_info    = [4,4,1,1]
+    obs_info    = [[-1,-1,1,1],[1,-1,1,1]]
+    plot        = Animation(domain_info,start_info,end_info,obs_info)
 
     # plot = Animation()
-    # quad = plot.draw_quad([3,2,2,4])
+    quad = plot.draw_quad([3,2,2,4])
     # # plot.draw_quad([3,2],[2,4],'white')
     # # plot.erase(quad)
-    # node = plot.draw_node([5,5])
-    # edge = plot.draw_edge([1,1,7,8])
-    # plot.erase([quad,node,edge],0)
+    node = plot.draw_node([5,5])
+    edge = plot.draw_edge([1,1,7,8])
+    plot.erase([quad,node,edge],0)
     # a, b = plot.quad_coor_conv([3,2],[2,4])
     # print(a)
     # print(b)
