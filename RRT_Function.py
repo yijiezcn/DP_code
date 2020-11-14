@@ -2,6 +2,8 @@ from Graph_RRT import *
 import random
 import numpy
 from Constant import *
+from animation import Animation
+
 
 class Queue():
 
@@ -16,7 +18,7 @@ class Queue():
             print("We already have one")
             return False
         q = [x, key]
-        self.list.append(q)
+        self.list.append(q) 
 
     def search(self, x):
         for q in self.list:
@@ -113,8 +115,8 @@ def Steer(x_nearest, point_random, points):
     xy = numpy.sqrt(numpy.square(x_delta)+numpy.square(y_delta))
     x_new_x = x_n[0] + min_edge*y_delta/xy
     x_new_y = x_n[1] + min_edge*x_delta/xy
-    points.append(Point(x_new_x, x_new_y))
-    x_new = len(points) - 1
+    points.append(Point(x_new_x, x_new_y))                                       
+    x_new = len(points) - 1                
     return x_new
 
 
@@ -130,7 +132,7 @@ def Near(G, x_new, points):
 def Initialize(x_1, x_2, points, goal):
     p1 = points[x_1]
     p2 = points[x_2]
-    if Region_Check(goal, p1.xy()) and Region_Check(goal, p2.xy()):
+    if Region_Check(goal, p1.xy()) and Region_Check(goal, p2.xy()): #//TODO why checking goal here? Avoid recurrent parent
         p1.Add_g(float('inf'))
         p1.Add_lmc(p2.g() + Distance_Points(p1.xy(), p2.xy()))
         return
@@ -149,7 +151,7 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
     if Obstacles_Free(Obstacles, points[x_nearest].xy(), points[x_new].xy()):
         Initialize(x_new, x_nearest, points, goal)
         # print("lmc of x_new is", points[x_new].lmc())
-        near_nodes = Near(G, x_new, points)
+        near_nodes = Near(G, x_new, points) 
         # print(near_nodes)
         # print("Now have points", len(points))
         # print("_________________________")
@@ -157,8 +159,8 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
             if Obstacles_Free(Obstacles, points[node].xy(), points[x_new].xy()):
                 if points[x_new].lmc() > points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()):
                     points[x_new].Add_lmc(points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()))
-                    if not Region_Check(goal, points[node].xy()) or not Region_Check(goal, points[x_new].xy()): # what is this for?
-                        points[x_new].Add_parent(node) # lmc update?
+                    if not Region_Check(goal, points[node].xy()) or not Region_Check(goal, points[x_new].xy()): #//TODO Same as above
+                        points[x_new].Add_parent(node)
                 G.Add_Edge([node, x_new])
                 G.Add_Edge([x_new, node])
         G.Add_Node(x_new)
@@ -232,18 +234,32 @@ def RRT_Body():
     P0 = Point(0, 0, 0, 0) # Is it the right way to initialize? LMC shoule be \infty?
     points = [P0]
 
+    # Jayson: plot
+    plot = Animation([50,50,100,100],[0,0,1,1],[35,35,10,10],[[15,15,10,10]])
+    #
     # initial queue
     q = Queue()
 
     goal_set = []
 
-    for i in range(1000):
+    for i in range(1000): 
+        #Jayson
+        len_points_before = len(points) 
+        #
         point_rand = Sample_Region(R)
         Extend(G, obstacles, points, point_rand, q, goal)
+        #Jayson
+        len_points_after = len(points)
+        #
+        x_new = len(points) - 1 #TODO what is x_new is not added to the graph? Maybe need to use G, and keep a variable from last iteraion
+        
+        #Jayson
+        if len_points_after == len_points_before + 1:
+            node = plot.draw_node(points[x_new].xy())
+        #
 
-        x_new = len(points) - 1
-        if Region_Check(goal, points[x_new].xy()):
-            goal_set.append(x_new)
+        if Region_Check(goal, points[x_new].xy()): #TODO same as above
+            goal_set.append(x_new) #TODO Why not use it?
         print(points[x_new].xy())
 
         # if i > 2:
@@ -267,7 +283,7 @@ def RRT_Body():
     print(G.Get_Edges())
     print(goal_set)
 
-    min_lmc = float('inf')
+    min_lmc = float('inf')#TODO
     min_index = 0
     for g in goal_set:
         if points[g].lmc() < min_lmc:
@@ -302,7 +318,7 @@ def Key_LQ(key1, key2):
         return False
 
 
-def Update_Queue(x, queue, points, goal):
+def Update_Queue(x, queue, points, goal): 
     point = points[x]
     if point.g() != point.lmc() and queue.search(x):
         queue.update(x, Key(point, goal))
@@ -315,11 +331,11 @@ def Update_Queue(x, queue, points, goal):
 def Replan(queue, G, points, goal):
     x_min, key_min = queue.findmin()
     nodes = G.Get_Nodes()
-    key_goal = [float('inf'), float('inf')]
+    key_goal = [float('inf'), float('inf')] 
     flag = 0
     # print(nodes)
     for node in nodes:
-        if Region_Check(goal, points[node].xy()):
+        if Region_Check(goal, points[node].xy()):#TODO Why not using goal_set? if goal_set != None
             flag = 1
             key_g = [points[node].lmc(), points[node].lmc()]
             if Key_LQ(key_g, key_goal):

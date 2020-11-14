@@ -38,17 +38,17 @@ class Region:
 
     def __init__(self, x_low, x_up, y_low, y_up):
         self.x_low = x_low
-        self.x_up = x_up
+        self.x_up  = x_up
         self.y_low = y_low
-        self.y_up = y_up
+        self.y_up  = y_up
 
 
 class Point:
 
     def __init__(self, x, y, g=float('inf'), lmc=float('inf'), parent=-1):
-        self._X = [x, y]
-        self._g = g
-        self._lmc = lmc
+        self._X      = [x, y]
+        self._g      = g
+        self._lmc    = lmc
         self._parent = parent
 
     def xy(self):

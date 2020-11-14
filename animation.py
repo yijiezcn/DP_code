@@ -2,18 +2,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class Animation():
-    PAUSE_TIME = 2
+    PAUSE_TIME = 0.01
     FIG_SIZE = 5
-    def __init__(self,start_info,end_info,obs_info):
+    def __init__(self,domain_info,start_info,end_info,obs_info):
         """Plot start,end and obstacles
 
         Args:
+            domain_info (list): Infor of the doamin, see self.draw_quad.
             start_info (list): Info of start_zone, see self.draw_quad.
             end_info (lsit): Info of end_zone, see self.draw_quad.
             obs_info (2d list): Each row is the info for an obstacle.
         """
         plt.ion()
         self.fig = plt.figure(figsize=(self.FIG_SIZE,self.FIG_SIZE))
+        self.draw_quad(domain_info, color='white')
         self.draw_quad(start_info, color='yellow')
         self.draw_quad(end_info, color='blue')
         for info in obs_info:
@@ -111,18 +113,19 @@ class Animation():
         return x_coor, y_coor
 
 def main():
-    start_info = [0,0,1,1]
-    end_info = [4,4,1,1]
-    obs_info = [[-1,-1,1,1],[1,-1,1,1]]
-    plot = Animation(start_info,end_info,obs_info)
+    domain_info = [0,0,5,5]
+    start_info  = [0,0,1,1]
+    end_info    = [4,4,1,1]
+    obs_info    = [[-1,-1,1,1],[1,-1,1,1]]
+    plot        = Animation(domain_info,start_info,end_info,obs_info)
 
     # plot = Animation()
-    # quad = plot.draw_quad([3,2,2,4])
+    quad = plot.draw_quad([3,2,2,4])
     # # plot.draw_quad([3,2],[2,4],'white')
     # # plot.erase(quad)
-    # node = plot.draw_node([5,5])
-    # edge = plot.draw_edge([1,1,7,8])
-    # plot.erase([quad,node,edge],0)
+    node = plot.draw_node([5,5])
+    edge = plot.draw_edge([1,1,7,8])
+    plot.erase([quad,node,edge],0)
     # a, b = plot.quad_coor_conv([3,2],[2,4])
     # print(a)
     # print(b)

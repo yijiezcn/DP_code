@@ -6,11 +6,11 @@ from queue import *
 # R = Region(0, 100, 0, 100)
 #
 # # obstacle
-# o1 = Region(50, 60, 50, 60)
+# o1        = Region(50, 60, 50, 60)
 # obstacles = [o1]
 #
 # # goal
-# goal = Region(10, 20, 10, 20)
+# goal   = Region(10, 20, 10, 20)
 # # goal = Region(90, 100, 90, 100)
 #
 # # graph
@@ -18,7 +18,7 @@ from queue import *
 #
 # # initial point
 # G.Add_Node(0)
-# P0 = Point(0, 0, 0, 0)
+# P0     = Point(0, 0, 0, 0)
 # points = [P0]
 #
 # # initial queue
