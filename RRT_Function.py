@@ -68,8 +68,6 @@ def Sample_Region(region):
     """
     x = random.uniform(region.x_low, region.x_up)
     y = random.uniform(region.y_low, region.y_up)
-    if x > 100 or y > 100: # TODO
-        print('sth wrong')
     X = [x, y]
     return X
 
@@ -134,7 +132,7 @@ def Near(G, x_new, points):
 def Initialize(x_1, x_2, points, goal):
     p1 = points[x_1]
     p2 = points[x_2]
-    if Region_Check(goal, p1.xy()) and Region_Check(goal, p2.xy()): #//TODO why checking goal here? Avoid recurrent parent
+    if Region_Check(goal, p1.xy()) and Region_Check(goal, p2.xy()): 
         p1.Add_g(float('inf'))
         p1.Add_lmc(p2.g() + Distance_Points(p1.xy(), p2.xy()))
         return
@@ -161,7 +159,7 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
             if Obstacles_Free(Obstacles, points[node].xy(), points[x_new].xy()):
                 if points[x_new].lmc() > points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()):
                     points[x_new].Add_lmc(points[node].g() + Distance_Points(points[node].xy(), points[x_new].xy()))
-                    if not Region_Check(goal, points[node].xy()) or not Region_Check(goal, points[x_new].xy()): #//TODO Same as above
+                    if not Region_Check(goal, points[node].xy()) or not Region_Check(goal, points[x_new].xy()): 
                         points[x_new].Add_parent(node)
                 G.Add_Edge([node, x_new])
                 G.Add_Edge([x_new, node])
@@ -236,10 +234,6 @@ def RRT_Body():
     P0 = Point(50, 50, 0, 0) 
     points = [P0]
 
-    # Jayson: plot
-    # plot = Animation([50,50,100,100],[0,0,1,1],[50,50,30,30],[[15,15,10,10]]) # TODO plot
-    #
-    # initial queue
     q = Queue()
 
     goal_set = []
@@ -248,7 +242,6 @@ def RRT_Body():
         point_rand = Sample_Region(R)
         Extend(G, obstacles, points, point_rand, q, goal)
         x_new = len(points) - 1 
-        # node = plot.draw_node(points[G._node[-1]].xy()) #TODO plot
 
         if Region_Check(goal, points[x_new].xy()): 
             goal_set.append(x_new)
@@ -280,7 +273,7 @@ def RRT_Body():
     print("Goal_set:",goal_set)
     
 
-    min_lmc = float('inf')#TODO
+    min_lmc = float('inf')
     min_index = 0
     for g in goal_set:
         if points[g].lmc() < min_lmc:
@@ -335,7 +328,7 @@ def Replan(queue, G, points, goal):
     flag = 0
     # print(nodes)
     for node in nodes:
-        if Region_Check(goal, points[node].xy()):#TODO Why not using goal_set? if goal_set != None
+        if Region_Check(goal, points[node].xy()):
             flag = 1
             key_g = [points[node].lmc(), points[node].lmc()]
             if Key_LQ(key_g, key_goal):
@@ -365,15 +358,26 @@ if __name__ == '__main__':
     G, points, opt_node_list = RRT_Body()
     print('opt_node_list=',opt_node_list)
     plot = Animation([50,50,100,100],[50,50,1,1],[80,80,30,30],[[15,15,10,10]])
+    nodes_coor = []
     for node_inx in range(len(G._node)):
         node = G._node[node_inx]
-        point = points[node]
-        plot.draw_node(point._X)
-        print("ploting node %i in %i"%(node_inx,len(G._node)))
-    for i in range(len(opt_node_list)-1):
-        edge_ind = [opt_node_list[i],opt_node_list[i+1]]
-        edge = [points[edge_ind[0]].xy()[0],points[edge_ind[0]].xy()[1],points[edge_ind[1]].xy()[0],points[edge_ind[1]].xy()[1]]
-        plot.draw_edge(edge,color='green')
+        nodes_coor.append(points[node]._X)
+    plot.draw_multi_nodes(nodes_coor)
+
+    total_edge_count = 0
+    for edge_ind in G._edge:
+        edge = [points[edge_ind[0]].xy()[0],points[edge_ind[0]].xy()[1],\
+                    points[edge_ind[1]].xy()[0],points[edge_ind[1]].xy()[1]]
+        plot.draw_edge(edge,color='green') # TODO why color is changing
+        print('plotting %i in %i edges'%(total_edge_count+1,len(G._edge)))
+        total_edge_count += 1
+
+    for opt_node_ind in range(len(opt_node_list)-1):
+        opt_edge_ind = [opt_node_list[opt_node_ind],opt_node_list[opt_node_ind+1]]
+        opt_edge = [points[opt_edge_ind[0]].xy()[0],points[opt_edge_ind[0]].xy()[1],\
+                    points[opt_edge_ind[1]].xy()[0],points[opt_edge_ind[1]].xy()[1]]
+        plot.draw_edge(opt_edge,color='green') # TODO why color is changing
     plot.save(path='./fig.pdf')
     plot.pause(1000)
     
+    # TODO Tree always grow in one direction. 1. Near. 2. Steer. 3. Initilize (first node and remaining)

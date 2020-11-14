@@ -30,7 +30,7 @@ class Animation():
         Args:
             info (list): [center_x, center_y, width, height]
             color (str, optional): Defaults to 'red'.
-            PAUSE (bool, optional): Flat for pause after plot. Pause if TRUE.
+            PAUSE (bool, optional): Falg for pause after plot. Pause if TRUE.
 
         Returns:
             [type]: Plotted quad
@@ -53,18 +53,35 @@ class Animation():
             marker (str, optional): markerstyle. Defaults to 'o'.
             ms (int, optional): Markersize . Defaults to 5.
             color (str, optional): Defaults to '#acf800'--light green.
-            PAUSE (bool, optional): Flat for pause after plot. Pause if TRUE.
+            PAUSE (bool, optional): Flag for pause after plot. Pause if TRUE.
 
         Returns:
             [type]: Plotted node
         """
         node = plt.plot(center[0],center[1],marker=marker,ms=ms,color=color)
-        if center[0] > 100 or center[1]> 100: # TODO revise back
-            print("sth wrong")
-
         if PAUSE:
             plt.pause(self.PAUSE_TIME)
         return node
+
+    def draw_multi_nodes(self, nodes_info, marker='o', ms=5, color='#acf800', PAUSE=1, ls=''):
+        """Draw multiple nodes, can not erase single node afterwards
+
+        Args:
+            nodes_info (2d list or array): Shape=[num_nodes, 2]. Each row is the xy coordinates for a node.
+            marker (str, optional): Markerstyle. Defaults to 'o'.
+            ms (int, optional): Markersize. Defaults to 5.
+            color (str, optional): Defaults to '#acf800'--light green.
+            PAUSE (bool, optional): Flag for pause after plot. Pause if TRUE.
+
+        Returns:
+            [type]: [description]
+        """
+        nodes_info = np.array(nodes_info).T
+        nodes = plt.plot(nodes_info[0],nodes_info[1],marker=marker,ms=ms,color=color, ls='')
+        if PAUSE:
+            plt.pause(self.PAUSE_TIME)
+        return nodes
+
 
     def draw_edge(self, info, lw=1, color='green', PAUSE=1):
         """Draw edge
@@ -73,7 +90,7 @@ class Animation():
             info (list): [start_x,start_y,end_x,end_y]
             lw (int, optional): linewidth. Defaults to 1.
             color (str, optional): Defaults to 'green'.
-            PAUSE (bool, optional): Flat for pause after plot. Pause if TRUE.
+            PAUSE (bool, optional): Flag for pause after plot. Pause if TRUE.
 
         Returns:
             [type]: Plotted node
@@ -89,7 +106,7 @@ class Animation():
         Args:
             obj (plotted element or list): If list, will erase everythin in the list.
             single (int, optional): Erase single obj if TRUE, otherwise multiple.
-            PAUSE (bool, optional): Flat for pause after plot. Pause if TRUE.
+            PAUSE (bool, optional): Flag for pause after plot. Pause if TRUE.
         """
         if single:
             obj.pop(0).remove()
