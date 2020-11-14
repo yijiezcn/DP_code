@@ -1,6 +1,6 @@
 from Graph_RRT import *
 import random
-import numpy
+import numpy as np
 from Constant import *
 from animation import Animation
 import sys
@@ -68,6 +68,8 @@ def Sample_Region(region):
     """
     x = random.uniform(region.x_low, region.x_up)
     y = random.uniform(region.y_low, region.y_up)
+    # if x < 20 and y > 80: # TODO just to check spaning problem
+    #     print('a point')
     X = [x, y]
     return X
 
@@ -82,8 +84,8 @@ def Distance_Points(X1, X2):
     Returns:
         float: the l2 distance
     """
-    A = numpy.square(X1[0] - X2[0]) + numpy.square(X1[1] - X2[1])
-    D = numpy.sqrt(A)
+    A = np.square(X1[0] - X2[0]) + np.square(X1[1] - X2[1])
+    D = np.sqrt(A)
     return D
 
 
@@ -110,24 +112,47 @@ def Nearest(G, points, point_random):
 
 def Steer(x_nearest, point_random, points):
     x_n = points[x_nearest].xy()
-    x_delta = numpy.abs(x_n[0]-point_random[0])
-    y_delta = numpy.abs(x_n[1]-point_random[1])
-    xy = numpy.sqrt(numpy.square(x_delta)+numpy.square(y_delta))
-    x_new_x = x_n[0] + min_edge*y_delta/xy
-    x_new_y = x_n[1] + min_edge*x_delta/xy
-    points.append(Point(x_new_x, x_new_y))                                       
+    x_delta = np.array(point_random[0] - x_n[0]) 
+    y_delta = np.array(point_random[1] - x_n[1])
+    xy = np.sqrt(np.square(x_delta)+np.square(y_delta))
+    if xy < min_edge:
+        points.append(Point(point_random[0], point_random[1]))
+    else:
+        x_new_x = x_n[0] + min_edge*x_delta/xy # 
+        x_new_y = x_n[1] + min_edge*y_delta/xy
+        points.append(Point(x_new_x, x_new_y))                                       
     x_new = len(points) - 1                
     return x_new
+
+# def Steer(x_nearest, point_random, points): #TODO previous steer
+#     x_n = points[x_nearest].xy()
+#     x_delta = np.abs(x_n[0]-point_random[0]) # TODO should we use abs?
+#     y_delta = np.abs(x_n[1]-point_random[1])
+#     xy = np.sqrt(np.square(x_delta)+np.square(y_delta))
+#     x_new_x = x_n[0] + min_edge*y_delta/xy # TODO x,y in wrong position
+#     x_new_y = x_n[1] + min_edge*x_delta/xy
+#     points.append(Point(x_new_x, x_new_y))                                       
+#     x_new = len(points) - 1                
+#     return x_new
 
 
 def Near(G, x_new, points):
     nodes = G.Get_Nodes()
     near_nodes = []
     for node in nodes:
-        if Distance_Points(points[node].xy(), points[x_new].xy()) <= Near_r:
+        if Distance_Points(points[node].xy(), points[x_new].xy()) <= Near_r(len(nodes)+100):
             near_nodes.append(node)
     return near_nodes
 
+def Near_r(n):
+    gamma = 20000
+    kesai_d = math.pi
+    lamda = 5
+    const_1 = math.sqrt((gamma/kesai_d) * (math.log(n)/n))
+    # print('math.log(%i)/%i=%i'%(n,n,math.log(n)/n))
+    # print('const_1=',const_1)
+    const_2 = lamda
+    return min(const_1, const_2)
 
 def Initialize(x_1, x_2, points, goal):
     p1 = points[x_1]
@@ -141,10 +166,12 @@ def Initialize(x_1, x_2, points, goal):
     p1.Add_parent(x_2)
 
 
-def Extend(G, Obstacles, points, point_random, queue, goal):
+def Extend(G, Obstacles, points, point_random, queue, goal, R):
     x_nearest = Nearest(G, points, point_random)
     # print("x_nearest is", x_nearest, points[x_nearest].xy())
     x_new = Steer(x_nearest, point_random, points) 
+    if not Region_Check(R, points[x_new].xy()):
+        return False
     # if Region_Check(goal, points[x_new].xy()):
     #     print("Yes")
     # print("x_new is",x_new, points[x_new].xy())
@@ -166,11 +193,18 @@ def Extend(G, Obstacles, points, point_random, queue, goal):
         G.Add_Node(x_new)
         Update_Queue(x_new, queue, points, goal)
 
+        return True
+    return False
+
 def Obstacles_Free(Obstacles, X1, X2):
+    sum = 0
     for Obstacle in Obstacles:
         if Obstacle_Free(Obstacle, X1, X2):
-            return True
-    return False
+            sum = sum + 1
+    if sum == len(Obstacles):
+        return True
+    else:
+        return False
 
 def Obstacle_Free(Obstacle, X1, X2):
     if ( X1[0] >= Obstacle.x_low and  X1[0] <= Obstacle.x_up and X1[1] >= Obstacle.y_low and X1[1] <= Obstacle.y_up ) \
@@ -212,18 +246,37 @@ def Region_Check(region, point):
         return True
     return False
 
-def RRT_Body():
+def RRT_Body(R_info,obs_info,goal_info,P_init_info):
+    """Main body of RRT#
+
+    Args:
+        R_info (list): Shape=(1,4). Center based coordinates of the region.
+        obs_info (list): Shape=(n_obs,4). Each row is the center based coordinates of the obstacles.
+        goal_info (list): Shape=(1,4). Center based coordinates of the goal.
+        P_init_info ([list]): Shape=(1,2). Coordinates of the initial point.
+
+    Returns:
+        [type]: [description]
+    """
     # working domain
-    R = Region(0, 100, 0, 100)
+    R_info = coor_converter(R_info)
+    R = Region(R_info[0], R_info[1], R_info[2], R_info[3])
 
     # obstacle
     # o1 = Region(50, 60, 50, 60)
-    o1 = Region(10, 20, 10, 20)
-    obstacles = [o1]
-
+    obs_info = coor_converter(obs_info)
+    obstacles = []
+    for obs_ind in range(obs_info.shape[0]):
+        single_obs_info = obs_info[obs_ind]
+        obstacles.append(Region(single_obs_info[0],single_obs_info[1],single_obs_info[2],single_obs_info[3]))
+    # o1 = Region(10, 20, 10, 20)
+    # o2 = Region(60,70,30,50)
+    # obstacles = [o1,o2]
+    # obstacles = [o1]
 
     # goal
-    goal = Region(65, 95, 65, 95)
+    goal_info = coor_converter(goal_info)
+    goal = Region(goal_info[0],goal_info[1],goal_info[2],goal_info[3])
     # goal = Region(90, 100, 90, 100)
 
     # graph
@@ -231,16 +284,18 @@ def RRT_Body():
 
     # initial point
     G.Add_Node(0)
-    P0 = Point(50, 50, 0, 0) 
+    P0 = Point(P_init_info[0], P_init_info[1], 0, 0) # TODO right way to initilize?
     points = [P0]
 
     q = Queue()
 
     goal_set = []
 
-    for i in range(500): 
-        point_rand = Sample_Region(R)
-        Extend(G, obstacles, points, point_rand, q, goal)
+    for i in range(1000): 
+        flag = False
+        while not flag:
+            point_rand = Sample_Region(R)
+            flag = Extend(G, obstacles, points, point_rand, q, goal, R)
         x_new = len(points) - 1 
 
         if Region_Check(goal, points[x_new].xy()): 
@@ -257,7 +312,7 @@ def RRT_Body():
         print(i)
         print("_________________________")
 
-    if goal_set == []:
+    if goal_set == []: # TODO just delete to see if now the tree spans the whole space
         print("Haven't get any sample in goal region, increase iteration number")
         sys.exit()
 
@@ -351,33 +406,73 @@ def Replan(queue, G, points, goal):
                 Update_Queue(next_node, queue,points, goal)
         x_min, key_min = queue.findmin()
 
+def coor_converter(coor):
+    """Convert coordinates from center based to boundary based
+
+    Args:
+        coor (list/array): shape=(n_quad,4). Each row represents a quad.
+                           First two coordinates are center, last two are width, height.
+
+    Returns:
+        list/array: shape=(n_quad,4). Each row represents a quad.
+                    Coordinates in boundary form. First two are x limits, last two are y limits.
+    """
+    coor = np.array(coor)
+    new_coor = np.zeros(shape=(coor.shape))
+    if coor.ndim == 1:
+        new_coor[0] = coor[0] - coor[2]/2
+        new_coor[1] = coor[0] + coor[2]/2
+        new_coor[2] = coor[1] - coor[3]/2
+        new_coor[3] = coor[1] + coor[3]/2
+    elif coor.ndim == 2:
+        for row in range(coor.shape[0]):
+            new_coor[row,0] = coor[row,0] - coor[row,2]/2
+            new_coor[row,1] = coor[row,0] + coor[row,2]/2
+            new_coor[row,2] = coor[row,1] - coor[row,3]/2
+            new_coor[row,3] = coor[row,1] + coor[row,3]/2
+    else:
+        print("Wrong dimention, should be 1 or 2")
+        sys.exit()
+    return new_coor
+
 def main():
     RRT_Body()
 
 if __name__ == '__main__':
-    G, points, opt_node_list = RRT_Body()
+
+    # new_coor = coor_converter([[50,50,20,20],[50,50,20,20]])
+    # new_coor = coor_converter([50,50,30,20])
+    # print(new_coor)
+
+    region_info = [50,50,100,100]
+    P_init_info = [50,50]
+    goal_info = [50,90,20,20]
+    obs_info = [[15,15,10,10],[65,30,10,20],[40,60,40,10],[90,70,10,30],[70,70,10,10]]
+
+    G, points, opt_node_list = RRT_Body(region_info,obs_info,goal_info,P_init_info)
     print('opt_node_list=',opt_node_list)
-    plot = Animation([50,50,100,100],[50,50,1,1],[80,80,30,30],[[15,15,10,10]])
+    plot = Animation(region_info,[P_init_info[0],P_init_info[1],3,3],goal_info,obs_info)
     nodes_coor = []
     for node_inx in range(len(G._node)):
         node = G._node[node_inx]
         nodes_coor.append(points[node]._X)
-    plot.draw_multi_nodes(nodes_coor)
+    plot.draw_multi_nodes(nodes_coor,color='#008000')
 
-    total_edge_count = 0
+    total_edge_count = 0 # TODO just to see tree expansion
     for edge_ind in G._edge:
         edge = [points[edge_ind[0]].xy()[0],points[edge_ind[0]].xy()[1],\
                     points[edge_ind[1]].xy()[0],points[edge_ind[1]].xy()[1]]
-        plot.draw_edge(edge,color='green') # TODO why color is changing
-        print('plotting %i in %i edges'%(total_edge_count+1,len(G._edge)))
+        plot.draw_edge(edge,lw=0.2,color='green') 
+        if total_edge_count%200 == 0:
+            print('plotting %i in %i edges'%(total_edge_count+1,len(G._edge)))
         total_edge_count += 1
 
     for opt_node_ind in range(len(opt_node_list)-1):
         opt_edge_ind = [opt_node_list[opt_node_ind],opt_node_list[opt_node_ind+1]]
         opt_edge = [points[opt_edge_ind[0]].xy()[0],points[opt_edge_ind[0]].xy()[1],\
                     points[opt_edge_ind[1]].xy()[0],points[opt_edge_ind[1]].xy()[1]]
-        plot.draw_edge(opt_edge,color='green') # TODO why color is changing
+        plot.draw_edge(opt_edge,lw=1,color='red') 
     plot.save(path='./fig.pdf')
     plot.pause(1000)
     
-    # TODO Tree always grow in one direction. 1. Near. 2. Steer. 3. Initilize (first node and remaining)
+    # TODO Tree always grow in one direction. 1. Near. 2. Steer. 3. Initilize (first node and remaining) 4. Extend

@@ -21,10 +21,10 @@ class Animation():
         self.draw_quad(start_info, color='yellow')
         self.draw_quad(end_info, color='blue')
         for info in obs_info:
-            self.draw_quad(info, color='red',PAUSE=1)
+            self.draw_quad(info, color='red',PAUSE=0)
 
 
-    def draw_quad(self, info, color='red', PAUSE=1):
+    def draw_quad(self, info, color='red', PAUSE=0):
         """Draw quadralateral
 
         Args:
@@ -45,7 +45,7 @@ class Animation():
         # plt.pause(2)
         return quad
 
-    def draw_node(self, center, marker='o', ms=5, color='#acf800', PAUSE=1):
+    def draw_node(self, center, marker='o', ms=5, color='#acf800', PAUSE=0): 
         """Draw node 
 
         Args:
@@ -63,14 +63,14 @@ class Animation():
             plt.pause(self.PAUSE_TIME)
         return node
 
-    def draw_multi_nodes(self, nodes_info, marker='o', ms=5, color='#acf800', PAUSE=1, ls=''):
+    def draw_multi_nodes(self, nodes_info, marker='o', ms=2, color='#ff0000', PAUSE=0, ls=''):
         """Draw multiple nodes, can not erase single node afterwards
 
         Args:
             nodes_info (2d list or array): Shape=[num_nodes, 2]. Each row is the xy coordinates for a node.
             marker (str, optional): Markerstyle. Defaults to 'o'.
             ms (int, optional): Markersize. Defaults to 5.
-            color (str, optional): Defaults to '#acf800'--light green.
+            color (str, optional): Defaults to '#ff0000'--red.
             PAUSE (bool, optional): Flag for pause after plot. Pause if TRUE.
 
         Returns:
@@ -83,7 +83,7 @@ class Animation():
         return nodes
 
 
-    def draw_edge(self, info, lw=1, color='green', PAUSE=1):
+    def draw_edge(self, info, lw=0.5, color='green', PAUSE=0):
         """Draw edge
 
         Args:
@@ -95,12 +95,12 @@ class Animation():
         Returns:
             [type]: Plotted node
         """
-        edge = plt.plot([info[0],info[2]],[info[1],info[3]])
+        edge = plt.plot([info[0],info[2]],[info[1],info[3]],lw=lw,color=color)
         if PAUSE:
             plt.pause(self.PAUSE_TIME)
         return edge
 
-    def erase(self, obj, single=1, PAUSE=1):
+    def erase(self, obj, single=1, PAUSE=0): 
         """erase plotted elements 
 
         Args:
