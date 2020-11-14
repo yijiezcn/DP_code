@@ -3,7 +3,7 @@ import random
 import numpy
 from Constant import *
 from animation import Animation
-
+import sys
 
 class Queue():
 
@@ -68,6 +68,8 @@ def Sample_Region(region):
     """
     x = random.uniform(region.x_low, region.x_up)
     y = random.uniform(region.y_low, region.y_up)
+    if x > 100 or y > 100: # TODO
+        print('sth wrong')
     X = [x, y]
     return X
 
@@ -144,7 +146,7 @@ def Initialize(x_1, x_2, points, goal):
 def Extend(G, Obstacles, points, point_random, queue, goal):
     x_nearest = Nearest(G, points, point_random)
     # print("x_nearest is", x_nearest, points[x_nearest].xy())
-    x_new = Steer(x_nearest, point_random, points)
+    x_new = Steer(x_nearest, point_random, points) 
     # if Region_Check(goal, points[x_new].xy()):
     #     print("Yes")
     # print("x_new is",x_new, points[x_new].xy())
@@ -223,7 +225,7 @@ def RRT_Body():
 
 
     # goal
-    goal = Region(30, 40, 30, 40)
+    goal = Region(65, 95, 65, 95)
     # goal = Region(90, 100, 90, 100)
 
     # graph
@@ -235,31 +237,21 @@ def RRT_Body():
     points = [P0]
 
     # Jayson: plot
-    plot = Animation([50,50,100,100],[0,0,1,1],[35,35,10,10],[[15,15,10,10]])
+    # plot = Animation([50,50,100,100],[0,0,1,1],[50,50,30,30],[[15,15,10,10]]) # TODO plot
     #
     # initial queue
     q = Queue()
 
     goal_set = []
 
-    for i in range(1000): 
-        #Jayson
-        len_points_before = len(points) 
-        #
+    for i in range(5000): 
         point_rand = Sample_Region(R)
         Extend(G, obstacles, points, point_rand, q, goal)
-        #Jayson
-        len_points_after = len(points)
-        #
-        x_new = len(points) - 1 #TODO what is x_new is not added to the graph? Maybe need to use G, and keep a variable from last iteraion
-        
-        #Jayson
-        if len_points_after == len_points_before + 1:
-            node = plot.draw_node(points[x_new].xy())
-        #
+        x_new = len(points) - 1 
+        # node = plot.draw_node(points[G._node[-1]].xy()) #TODO plot
 
-        if Region_Check(goal, points[x_new].xy()): #TODO same as above
-            goal_set.append(x_new) #TODO Why not use it?
+        if Region_Check(goal, points[x_new].xy()): 
+            goal_set.append(x_new)
         print(points[x_new].xy())
 
         # if i > 2:
@@ -272,6 +264,10 @@ def RRT_Body():
         print(i)
         print("_________________________")
 
+    if goal_set == []:
+        print("Haven't get any sample in goal region, increase iteration number")
+        sys.exit()
+
     G.Delete_Edge()
 
     nodes = G.Get_Nodes()
@@ -280,8 +276,9 @@ def RRT_Body():
         if points[node].parent() != -1:
             G.Add_Edge([points[node].parent(), node])
 
-    print(G.Get_Edges())
-    print(goal_set)
+    print("Edges in the returned tree:",G.Get_Edges())
+    print("Goal_set:",goal_set)
+    
 
     min_lmc = float('inf')#TODO
     min_index = 0
@@ -292,9 +289,12 @@ def RRT_Body():
         # print("Point ", g, " lmc is ", points[g].lmc())
 
     path_index = min_index
+    opt_node_list = []
     while path_index != -1:
         print("Path: ",path_index, points[path_index].xy(),"; Lmc is", points[path_index].lmc())
+        opt_node_list.append(path_index)
         path_index = points[path_index].parent()
+    return G, points, opt_node_list
 
 def h(P, goal_region):
     x_goal = (goal_region.x_low + goal_region.x_up)/2
@@ -358,3 +358,22 @@ def Replan(queue, G, points, goal):
                 Update_Queue(next_node, queue,points, goal)
         x_min, key_min = queue.findmin()
 
+def main():
+    RRT_Body()
+
+if __name__ == '__main__':
+    G, points, opt_node_list = RRT_Body()
+    print('opt_node_list=',opt_node_list)
+    plot = Animation([50,50,100,100],[0,0,1,1],[80,80,30,30],[[15,15,10,10]])
+    # for node_inx in range(len(G._node)):
+    #     node = G._node[node_inx]
+    #     point = points[node]
+    #     plot.draw_node(point._X)
+    #     print("ploting node %i in %i"%(node_inx,len(G._node)))
+    for i in range(len(opt_node_list)-1):
+        edge_ind = [opt_node_list[i],opt_node_list[i+1]]
+        edge = [points[edge_ind[0]].xy()[0],points[edge_ind[0]].xy()[1],points[edge_ind[1]].xy()[0],points[edge_ind[1]].xy()[1]]
+        plot.draw_edge(edge,color='green')
+    plot.save(path='./fig.pdf')
+    plot.pause(1000)
+    

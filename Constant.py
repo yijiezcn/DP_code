@@ -1,2 +1,2 @@
-min_edge = 3
-Near_r = 4
+min_edge = 10
+Near_r = 20

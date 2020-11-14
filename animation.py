@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 class Animation():
     PAUSE_TIME = 0.01
@@ -14,6 +15,7 @@ class Animation():
             obs_info (2d list): Each row is the info for an obstacle.
         """
         plt.ion()
+        # plt.axis('off')
         self.fig = plt.figure(figsize=(self.FIG_SIZE,self.FIG_SIZE))
         self.draw_quad(domain_info, color='white')
         self.draw_quad(start_info, color='yellow')
@@ -57,6 +59,9 @@ class Animation():
             [type]: Plotted node
         """
         node = plt.plot(center[0],center[1],marker=marker,ms=ms,color=color)
+        if center[0] > 100 or center[1]> 100: # TODO revise back
+            print("sth wrong")
+
         if PAUSE:
             plt.pause(self.PAUSE_TIME)
         return node
@@ -95,6 +100,12 @@ class Animation():
                 _.pop(0).remove()
                 if PAUSE:
                     plt.pause(self.PAUSE_TIME)
+
+    def pause(self, time):
+        plt.pause(time)
+
+    def save(self,path):
+        plt.savefig(path)
             
     def quad_coor_conv(self, center, size):
         """Covert [center, sieze] of quad into x,y coordinates 
