@@ -233,7 +233,7 @@ def RRT_Body():
 
     # initial point
     G.Add_Node(0)
-    P0 = Point(0, 0, 0, 0) # Is it the right way to initialize? LMC shoule be \infty?
+    P0 = Point(50, 50, 0, 0) 
     points = [P0]
 
     # Jayson: plot
@@ -244,7 +244,7 @@ def RRT_Body():
 
     goal_set = []
 
-    for i in range(5000): 
+    for i in range(500): 
         point_rand = Sample_Region(R)
         Extend(G, obstacles, points, point_rand, q, goal)
         x_new = len(points) - 1 
@@ -364,12 +364,12 @@ def main():
 if __name__ == '__main__':
     G, points, opt_node_list = RRT_Body()
     print('opt_node_list=',opt_node_list)
-    plot = Animation([50,50,100,100],[0,0,1,1],[80,80,30,30],[[15,15,10,10]])
-    # for node_inx in range(len(G._node)):
-    #     node = G._node[node_inx]
-    #     point = points[node]
-    #     plot.draw_node(point._X)
-    #     print("ploting node %i in %i"%(node_inx,len(G._node)))
+    plot = Animation([50,50,100,100],[50,50,1,1],[80,80,30,30],[[15,15,10,10]])
+    for node_inx in range(len(G._node)):
+        node = G._node[node_inx]
+        point = points[node]
+        plot.draw_node(point._X)
+        print("ploting node %i in %i"%(node_inx,len(G._node)))
     for i in range(len(opt_node_list)-1):
         edge_ind = [opt_node_list[i],opt_node_list[i+1]]
         edge = [points[edge_ind[0]].xy()[0],points[edge_ind[0]].xy()[1],points[edge_ind[1]].xy()[0],points[edge_ind[1]].xy()[1]]
