@@ -1,5 +1,4 @@
 import numpy as np
 
-a = np.array([[1,2],[3,4],[5,6]])
-for edge in a:
-    print(edge)
+a = [1,2,3]
+np.savetxt('./test_save',a)

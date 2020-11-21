@@ -246,7 +246,7 @@ def Region_Check(region, point):
         return True
     return False
 
-def RRT_Body(R_info,obs_info,goal_info,P_init_info):
+def RRT_Body(R_info,obs_info,goal_info,P_init_info,N_iteration=2000,PLOT_INTERVAL=500):
     """Main body of RRT#
 
     Args:
@@ -254,10 +254,17 @@ def RRT_Body(R_info,obs_info,goal_info,P_init_info):
         obs_info (list): Shape=(n_obs,4). Each row is the center based coordinates of the obstacles.
         goal_info (list): Shape=(1,4). Center based coordinates of the goal.
         P_init_info ([list]): Shape=(1,2). Coordinates of the initial point.
+        N_iteration (int): Number of iteration.
 
     Returns:
         [type]: [description]
     """
+
+    G_container = [] # TODO
+    points_container = []
+    opt_node_list_container = []
+    min_lmc_container = []
+
     # working domain
     R_info = coor_converter(R_info)
     R = Region(R_info[0], R_info[1], R_info[2], R_info[3])
@@ -291,7 +298,7 @@ def RRT_Body(R_info,obs_info,goal_info,P_init_info):
 
     goal_set = []
 
-    for i in range(1000): 
+    for i in range(N_iteration): 
         flag = False
         while not flag:
             point_rand = Sample_Region(R)
@@ -311,38 +318,53 @@ def RRT_Body(R_info,obs_info,goal_info,P_init_info):
         #     print("LMC is", points[2].lmc())
         print(i)
         print("_________________________")
+        if (i+1)%PLOT_INTERVAL == 0 and (i+1)!=0:
+            if goal_set == []: # TODO just delete to see if now the tree spans the whole space
+                print("Haven't get any sample in goal region, increase iteration number")
+                sys.exit()
+            G_temp = Graph()
+            egdes = G.Get_Edges()
+            nodes = G.Get_Nodes()
+            for edge in egdes:
+                G_temp.Add_Edge(edge)
+            for node in nodes:
+                G_temp.Add_Node(node)
+            
+            G_temp.Delete_Edge()
 
-    if goal_set == []: # TODO just delete to see if now the tree spans the whole space
-        print("Haven't get any sample in goal region, increase iteration number")
-        sys.exit()
+            nodes = G_temp.Get_Nodes()
 
-    G.Delete_Edge()
+            for node in nodes:
+                if points[node].parent() != -1:
+                    G_temp.Add_Edge([points[node].parent(), node])
 
-    nodes = G.Get_Nodes()
-
-    for node in nodes:
-        if points[node].parent() != -1:
-            G.Add_Edge([points[node].parent(), node])
-
-    print("Edges in the returned tree:",G.Get_Edges())
-    print("Goal_set:",goal_set)
+            print("Edges in the returned tree:",G_temp.Get_Edges())
+            print("Goal_set:",goal_set)
     
 
-    min_lmc = float('inf')
-    min_index = 0
-    for g in goal_set:
-        if points[g].lmc() < min_lmc:
-            min_lmc = points[g].lmc()
-            min_index = g
-        # print("Point ", g, " lmc is ", points[g].lmc())
+            min_lmc = float('inf')
+            min_index = 0
+            for g in goal_set:
+                if points[g].lmc() < min_lmc:
+                    min_lmc = points[g].lmc()
+                    min_index = g
+                # print("Point ", g, " lmc is ", points[g].lmc())
 
-    path_index = min_index
-    opt_node_list = []
-    while path_index != -1:
-        print("Path: ",path_index, points[path_index].xy(),"; Lmc is", points[path_index].lmc())
-        opt_node_list.append(path_index)
-        path_index = points[path_index].parent()
-    return G, points, opt_node_list
+            path_index = min_index
+            opt_node_list = []
+            while path_index != -1:
+                print("Path: ",path_index, points[path_index].xy(),"; Lmc is", points[path_index].lmc())
+                opt_node_list.append(path_index)
+                path_index = points[path_index].parent()
+                if path_index in opt_node_list:
+                    return None, None, None, None
+            points_temp = points.copy()
+            opt_node_list_temp = opt_node_list.copy()
+            G_container.append(G_temp)
+            points_container.append(points_temp)
+            opt_node_list_container.append(opt_node_list_temp)
+            min_lmc_container.append(min_lmc)
+    return G_container, points_container, opt_node_list_container,min_lmc_container
 
 def h(P, goal_region):
     x_goal = (goal_region.x_low + goal_region.x_up)/2
@@ -446,33 +468,38 @@ if __name__ == '__main__':
 
     region_info = [50,50,100,100]
     P_init_info = [50,50]
-    goal_info = [50,90,20,20]
-    obs_info = [[15,15,10,10],[65,30,10,20],[40,60,40,10],[90,70,10,30],[70,70,10,10]]
+    goal_info   = [50,90,20,20]
+    obs_info    = [[15,15,10,10],[65,30,10,20],[40,60,40,10],[90,70,10,30],[70,70,10,10]]
 
-    G, points, opt_node_list = RRT_Body(region_info,obs_info,goal_info,P_init_info)
-    print('opt_node_list=',opt_node_list)
-    plot = Animation(region_info,[P_init_info[0],P_init_info[1],3,3],goal_info,obs_info)
-    nodes_coor = []
-    for node_inx in range(len(G._node)):
-        node = G._node[node_inx]
-        nodes_coor.append(points[node]._X)
-    plot.draw_multi_nodes(nodes_coor,color='#008000')
+    for test_num in range(50):
+        G_container, points_container, opt_node_list_container, min_lmc_container =\
+             RRT_Body(region_info,obs_info,goal_info,P_init_info)
+        if G_container == None:
+            continue
+        for plot_ind in range(len(points_container)):
+            print('------------------------------')
+            print("%ith plot"%plot_ind)
+            print('opt_node_list=',opt_node_list_container[plot_ind])
+            plot = Animation(region_info,[P_init_info[0],P_init_info[1],3,3],goal_info,obs_info)
+            nodes_coor = []
+            for node_inx in range(len(G_container[plot_ind]._node)):
+                node = G_container[plot_ind]._node[node_inx]
+                nodes_coor.append(points_container[plot_ind][node]._X)
+            plot.draw_multi_nodes(nodes_coor,color='#008000')
 
-    total_edge_count = 0 # TODO just to see tree expansion
-    for edge_ind in G._edge:
-        edge = [points[edge_ind[0]].xy()[0],points[edge_ind[0]].xy()[1],\
-                    points[edge_ind[1]].xy()[0],points[edge_ind[1]].xy()[1]]
-        plot.draw_edge(edge,lw=0.2,color='green') 
-        if total_edge_count%200 == 0:
-            print('plotting %i in %i edges'%(total_edge_count+1,len(G._edge)))
-        total_edge_count += 1
+            total_edge_count = 0 # TODO just to see tree expansion
+            for edge_ind in G_container[plot_ind]._edge:
+                edge = [points_container[plot_ind][edge_ind[0]].xy()[0],points_container[plot_ind][edge_ind[0]].xy()[1],\
+                            points_container[plot_ind][edge_ind[1]].xy()[0],points_container[plot_ind][edge_ind[1]].xy()[1]]
+                plot.draw_edge(edge,lw=0.2,color='green') 
+                if total_edge_count%200 == 0:
+                    print('plotting %i in %i edges'%(total_edge_count+1,len(G_container[plot_ind]._edge)))
+                total_edge_count += 1
 
-    for opt_node_ind in range(len(opt_node_list)-1):
-        opt_edge_ind = [opt_node_list[opt_node_ind],opt_node_list[opt_node_ind+1]]
-        opt_edge = [points[opt_edge_ind[0]].xy()[0],points[opt_edge_ind[0]].xy()[1],\
-                    points[opt_edge_ind[1]].xy()[0],points[opt_edge_ind[1]].xy()[1]]
-        plot.draw_edge(opt_edge,lw=1,color='red') 
-    plot.save(path='./fig.pdf')
-    plot.pause(1000)
-    
-    # TODO Tree always grow in one direction. 1. Near. 2. Steer. 3. Initilize (first node and remaining) 4. Extend
+            for opt_node_ind in range(len(opt_node_list_container[plot_ind])-1):
+                opt_edge_ind = [opt_node_list_container[plot_ind][opt_node_ind],opt_node_list_container[plot_ind][opt_node_ind+1]]
+                opt_edge = [points_container[plot_ind][opt_edge_ind[0]].xy()[0],points_container[plot_ind][opt_edge_ind[0]].xy()[1],\
+                            points_container[plot_ind][opt_edge_ind[1]].xy()[0],points_container[plot_ind][opt_edge_ind[1]].xy()[1]]
+                plot.draw_edge(opt_edge,lw=1,color='red') 
+            plot.save(path='./Result/Test%ifig%i.pdf'%(test_num,plot_ind))
+        np.savetxt('./Result/Test%i'%(test_num),min_lmc_container)
